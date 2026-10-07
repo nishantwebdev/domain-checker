@@ -158,7 +158,8 @@ class DomainCheckController extends Controller
             } elseif ($request->input('status') === 'failed') {
                 $query->where('status', 'failed');
             } else {
-                $query->where('mail_provider', $request->input('status'));
+                // Use json_contains for SQLite/MySQL/PostgreSQL to find if the JSON array contains an object with this provider
+                $query->whereJsonContains('mail_providers', ['provider' => $request->input('status')]);
             }
         }
         
@@ -179,13 +180,16 @@ class DomainCheckController extends Controller
             fputcsv($file, ['Domain', 'Status', 'Blacklisted', 'Blacklist Score', 'Mail Provider', 'Confidence']);
 
             foreach (DomainCheck::where('batch_id', $batchId)->lazy() as $check) {
+                $providers = collect($check->mail_providers ?? [])->pluck('provider')->implode(', ');
+                $confidences = collect($check->mail_providers ?? [])->pluck('confidence')->implode(', ');
+
                 fputcsv($file, [
                     $check->domain,
                     $check->status,
                     $check->is_blacklisted ? 'Yes' : 'No',
                     $check->blacklist_score,
-                    $check->mail_provider,
-                    $check->provider_confidence
+                    $providers,
+                    $confidences
                 ]);
             }
             fclose($file);

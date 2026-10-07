@@ -108,33 +108,42 @@ export default function LiveResultsTable({ batchId, onInspect }: Props) {
             }
         },
         {
-            accessorKey: 'mail_provider',
-            header: 'Provider',
+            accessorKey: 'mail_providers',
+            header: 'Provider(s)',
             cell: info => {
                 const row = info.row.original;
                 if (row.status !== 'completed') return <span className="text-slate-400">-</span>;
+                const providers = row.mail_providers || [];
                 
+                if (providers.length === 0) {
+                    return <span className="text-slate-400">Not detected</span>;
+                }
+
                 return (
-                    <div className="flex flex-col">
-                        <div className="flex items-center space-x-2">
-                            <span className="capitalize font-semibold text-slate-800 dark:text-slate-200">
-                                {row.mail_provider.replace('_', ' ')}
-                            </span>
-                            {row.provider_confidence && row.mail_provider !== 'not_detected' && (
-                                <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded font-bold ${
-                                    row.provider_confidence === 'high' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
-                                    row.provider_confidence === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
-                                    'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
-                                }`}>
-                                    {row.provider_confidence}
-                                </span>
-                            )}
-                        </div>
-                        {row.detection_reasons && row.detection_reasons.length > 0 && (
-                            <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm truncate block" title={row.detection_reasons[0]}>
-                                {row.detection_reasons[0]}
-                            </span>
-                        )}
+                    <div className="flex flex-col gap-2">
+                        {providers.map((p: any, idx: number) => (
+                            <div key={idx} className="flex flex-col">
+                                <div className="flex items-center space-x-2">
+                                    <span className="capitalize font-semibold text-slate-800 dark:text-slate-200">
+                                        {p.provider.replace('_', ' ')}
+                                    </span>
+                                    {p.confidence && p.provider !== 'not_detected' && (
+                                        <span className={`text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded font-bold ${
+                                            p.confidence === 'high' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' :
+                                            p.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                                            'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+                                        }`}>
+                                            {p.confidence}
+                                        </span>
+                                    )}
+                                </div>
+                                {p.reasons && p.reasons.length > 0 && (
+                                    <span className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm truncate block" title={p.reasons[0]}>
+                                        {p.reasons[0]}
+                                    </span>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 );
             }

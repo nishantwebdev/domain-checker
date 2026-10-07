@@ -79,9 +79,11 @@ export default function DnsInspectorDrawer({ isOpen, onClose, data }: Props) {
                     <div className="grid grid-cols-2 gap-4 mb-8">
                         <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50">
                             <Server className="w-5 h-5 text-blue-600 dark:text-blue-400 mb-2" />
-                            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Mail Provider</div>
+                            <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mb-1">Mail Provider(s)</div>
                             <div className="text-sm font-semibold text-slate-900 dark:text-white capitalize truncate">
-                                {data.mail_provider.replace('_', ' ')}
+                                {(data.mail_providers || []).length > 0 
+                                    ? data.mail_providers.map((p: any) => p.provider.replace('_', ' ')).join(', ')
+                                    : 'Not detected'}
                             </div>
                         </div>
                         <div className={`p-4 rounded-xl border ${data.is_blacklisted ? 'bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-800/50' : 'bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-800/50'}`}>

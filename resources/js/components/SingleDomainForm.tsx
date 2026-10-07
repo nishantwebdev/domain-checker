@@ -118,34 +118,48 @@ export default function SingleDomainForm({ onInspect }: { onInspect: (data: any)
                         </div>
                         <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Provider Intelligence</h3>
 
-                        <div className="mb-6">
-                            <div className="text-3xl font-bold text-slate-900 dark:text-white capitalize mb-1">
-                                {result.mail_provider.replace('_', ' ')}
-                            </div>
-                            {result.mail_provider !== 'not_detected' && (
-                                <div className="flex items-center text-sm">
-                                    <span className="text-slate-500 dark:text-slate-400 mr-2">Confidence:</span>
-                                    <span className={`font-medium capitalize ${result.provider_confidence === 'high' ? 'text-green-600 dark:text-green-400' :
-                                            result.provider_confidence === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
-                                                'text-slate-600 dark:text-slate-300'
-                                        }`}>
-                                        {result.provider_confidence || 'N/A'}
-                                    </span>
+                        {(!result.mail_providers || result.mail_providers.length === 0) ? (
+                            <div className="mb-6">
+                                <div className="text-3xl font-bold text-slate-900 dark:text-white capitalize mb-1">
+                                    Not detected
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {result.mail_providers.map((p: any, idx: number) => (
+                                    <div key={idx}>
+                                        <div className="mb-3">
+                                            <div className="text-xl font-bold text-slate-900 dark:text-white capitalize mb-1">
+                                                {p.provider.replace('_', ' ')}
+                                            </div>
+                                            {p.provider !== 'not_detected' && (
+                                                <div className="flex items-center text-sm">
+                                                    <span className="text-slate-500 dark:text-slate-400 mr-2">Confidence:</span>
+                                                    <span className={`font-medium capitalize ${p.confidence === 'high' ? 'text-green-600 dark:text-green-400' :
+                                                            p.confidence === 'medium' ? 'text-yellow-600 dark:text-yellow-400' :
+                                                                'text-slate-600 dark:text-slate-300'
+                                                        }`}>
+                                                        {p.confidence || 'N/A'}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
 
-                        {result.detection_reasons && result.detection_reasons.length > 0 && (
-                            <div>
-                                <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Detection Reasons</h4>
-                                <ul className="space-y-2">
-                                    {result.detection_reasons.map((reason: string, idx: number) => (
-                                        <li key={idx} className="text-sm text-slate-700 dark:text-slate-300 flex items-start">
-                                            <span className="text-blue-500 mr-2">•</span>
-                                            {reason}
-                                        </li>
-                                    ))}
-                                </ul>
+                                        {p.reasons && p.reasons.length > 0 && (
+                                            <div>
+                                                <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Detection Reasons</h4>
+                                                <ul className="space-y-1">
+                                                    {p.reasons.map((reason: string, rIdx: number) => (
+                                                        <li key={rIdx} className="text-sm text-slate-700 dark:text-slate-300 flex items-start">
+                                                            <span className="text-blue-500 mr-2">•</span>
+                                                            {reason}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>

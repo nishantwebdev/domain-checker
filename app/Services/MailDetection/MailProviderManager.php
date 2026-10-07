@@ -21,18 +21,27 @@ class MailProviderManager
         ])->sortBy(fn (MailProviderDetectorInterface $detector) => $detector->priority());
     }
 
-    public function detect(string $domain, DnsRecordsDTO $records): ProviderDetectionResult
+    /**
+     * @return array<ProviderDetectionResult>
+     */
+    public function detect(string $domain, DnsRecordsDTO $records): array
     {
+        $results = [];
+        
         foreach ($this->detectors as $detector) {
             $result = $detector->detect($domain, $records);
             
             if ($result !== null && $result->provider !== 'not_detected' && $result->provider !== 'other') {
-                return $result;
+                $results[] = $result;
             }
         }
         
-        // If we reach here, we only found "other" or "not_detected" from fallback
-        $fallback = $this->detectors->last()->detect($domain, $records);
-        return $fallback ?? new ProviderDetectionResult('not_detected', 'low', ['Detection failed.']);
+        // If we reach here and found no providers, use fallback
+        if (empty($results)) {
+            $fallback = $this->detectors->last()->detect($domain, $records);
+            $results[] = $fallback ?? new ProviderDetectionResult('not_detected', 'low', ['Detection failed.']);
+        }
+        
+        return $results;
     }
 }

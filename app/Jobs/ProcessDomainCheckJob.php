@@ -71,7 +71,15 @@ class ProcessDomainCheckJob implements ShouldQueue
             $blacklistResult = $dnsblService->check($domainCheck->domain);
 
             // 3. Detect Provider
-            $providerResult = $providerManager->detect($domainCheck->domain, $dnsRecords);
+            $providerResults = $providerManager->detect($domainCheck->domain, $dnsRecords);
+
+            $mailProviders = array_map(function($result) {
+                return [
+                    'provider' => $result->provider,
+                    'confidence' => $result->confidence,
+                    'reasons' => $result->reasons
+                ];
+            }, $providerResults);
 
             // Update record
             $domainCheck->update([
@@ -86,9 +94,7 @@ class ProcessDomainCheckJob implements ShouldQueue
                 'blacklist_score' => $blacklistResult['score'],
                 'listed_blacklists' => empty($blacklistResult['listed_blacklists']) ? null : $blacklistResult['listed_blacklists'],
                 
-                'mail_provider' => $providerResult->provider,
-                'provider_confidence' => $providerResult->provider === 'not_detected' ? null : $providerResult->confidence,
-                'detection_reasons' => $providerResult->reasons,
+                'mail_providers' => $mailProviders,
             ]);
 
         } catch (\Exception $e) {
